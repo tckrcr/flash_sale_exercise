@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: items-api-deployment
+spec:
+  replicas: 2 
+  selector:
+    matchLabels:
+      app: items-api
+  template:
+    metadata:
+      labels:
+        app: items-api
+    spec:
+      containers:
+        - name: tec-takehome-container
+          image: <account key>.dkr.ecr.region.amazonaws.com/tec-takehome-2024:latest
+          ports:
+            - containerPort: 5000
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "100Mi"
+            limits:
+              cpu: "1"
+              memory: "200Mi"
+          livenessProbe:
+            httpGet:
+              path: /items
+              port: 5000
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /items
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      imagePullSecrets:
+        - name: ecr-credentials
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: items-api-loadbalancer
+spec:
+  type: LoadBalancer
+  selector:
+    app: items-api
+  ports:
+    - port: 80
+      targetPort: 5000
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: items-api-pdb
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: items-api

@@ -1,0 +1,12 @@
+# Cluster Autoscaler Config
+apiVersion: eks.amazonaws.com/v1
+kind: Cluster
+metadata:
+  name: eks-cluster-autoscaler
+spec:
+  clusterAutoscaler:
+    enabled: true
+    minSize: 2
+    maxSize: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 75
